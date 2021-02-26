@@ -10,7 +10,6 @@ output:
     code_download: true
 ---
 
-
 ```{r setup, include=FALSE}
 #knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
@@ -106,7 +105,7 @@ newBabyNames <-
   group_by(year, sex) %>%
   summarize(proportion = mean(hasNames)) %>%
   ggplot(aes(x = year, y = proportion, color = sex)) +
-  geom_line()
+  geom_line() +
 
 ggplotly(newBabyNames, tooltip = c("proportion", "year"))
 ```
