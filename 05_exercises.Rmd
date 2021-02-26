@@ -122,10 +122,10 @@ delayedAIX <-
   geom_point() +
   scale_color_viridis_d() +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-  labs(title = "Monthly Median of Delayed Departures from Aix En Provence TGV") +
+  labs(title = "Median Number of Delayed Departures from Aix En Provence TGV,  per Month") +
   transition_time(month)
 
-animate(delayedAIX, duration = 20)
+animate(delayedAIX, duration = 30)
 ```
 
 ## Garden data
