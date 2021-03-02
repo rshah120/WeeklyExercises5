@@ -122,7 +122,7 @@ delayedAIX <-
   geom_point() +
   scale_color_viridis_d() +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-  labs(title = "Median Number of Delayed Departures from Aix En Provence TGV,  per Month") +
+  labs(title = "Median Number of Delayed Departures from Aix En Provence TGV, per Month") +
   transition_time(month)
 
 animate(delayedAIX, duration = 30)
@@ -139,6 +139,7 @@ animate(delayedAIX, duration = 30)
 I have started the code for you below. The `complete()` function creates a row for all unique `date`/`variety` combinations. If a variety is not harvested on one of the harvest dates in the dataset, it is filled with a value of 0.
 
 ```{r}
+
 garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
   group_by(date, variety) %>% 
@@ -150,11 +151,8 @@ garden_harvest %>%
   ggplot() +
   geom_area(aes(x = date, y = cumulative_harvest_lb, fill = fct_reorder2(variety, variety, cumulative_harvest_lb,.desc = FALSE))) +
   theme(legend.position = "top") +
-  labs(x = "",
-       y = "",
-       title = "Cumulative Harvest of Tomatoes (lbs) by Variety",
-       subtitle = "Date: {frame_along}",
-       fill = "") +
+  labs(title = "Tomatoes Cumulative Harvest, by Variety",
+       subtitle = "Date: {frame_along}") +
   transition_reveal(date)
 
 ```
@@ -185,11 +183,10 @@ ggmap(mallorcaMap) +
   annotate("point", x = 2.586712, y = 39.66002, color = "red") +
   annotate("text", x = 2.586712, y = 39.65002, color = "red", 
            label = "Current Location") +
-  scale_color_viridis_c()+
+  scale_color_viridis_c() +
   theme_map() +
   transition_reveal(time) +
-  labs(caption = )
-  
+  labs(subtitle = "Time: {frame_along}")
 
 ```
   
@@ -207,7 +204,27 @@ ggmap(mallorcaMap) +
   * Create a static plot with cumulative cases on the x-axis and new cases in the past 7 days on the y-axis. Connect the points for each state over time. HINTS: use `geom_path()` and add a `group` aesthetic.  Put the x and y axis on the log scale and make the tick labels look nice - `scales::comma` is one option. This plot will look pretty ugly as is.
   * Animate the plot to reveal the pattern by date. Display the date as the subtitle. Add a leading point to each state's line (`geom_point()`) and add the state name as a label (`geom_text()` - you should look at the `check_overlap` argument).  
   * Use the `animate()` function to have 200 frames in your animation and make it 30 seconds long. 
-  * Comment on what you observe.
+  * Comment on what you observe. 
+  
+```{r}
+myCovid19 <-
+  covid19 %>%
+  group_by(state) %>%
+  arrange(state) %>%
+  mutate(week_lag = lag(cases, 7)) %>%
+  replace_na(list(week_lag = 0)) %>%
+  mutate(new_cases_per_week = cases - week_lag) %>%
+  replace_na(list(new_cases_per_week = 0)) %>%
+  filter(cases > 20) %>%
+  ggplot(aes(x = cases, y = new_cases_per_week, color = state)) +
+  scale_color_viridis_d() +
+  geom_path() +
+  scale_x_log10() +
+  scale_y_log10() +
+  transition_reveal(date)
+
+animate(myCovid19, duration = 30, nframes = 200)
+```
   
   7. In this exercise you will animate a map of the US, showing how cumulative COVID-19 cases per 10,000 residents has changed over time. This is similar to exercises 11 & 12 from the previous exercises, with the added animation! So, in the end, you should have something like the static map you made there, but animated over all the days. The code below gives the population estimates for each state and loads the `states_map` data. Here is a list of details you should include in the plot:
   
@@ -217,13 +234,12 @@ ggmap(mallorcaMap) +
   * Use `group = date` in `aes()`.   
   * Comment on what you see.  
 
-
 ```{r}
 census_pop_est_2018 <- read_csv("https://www.dropbox.com/s/6txwv3b4ng7pepe/us_census_2018_state_pop_est.csv?dl=1") %>% 
   separate(state, into = c("dot","state"), extra = "merge") %>% 
   select(-dot) %>% 
-  mutate(state = str_to_lower(state))
-
+  mutate(state = str_to_lower(state)) %>%
+  
 states_map <- map_data("state")
 ```
 
