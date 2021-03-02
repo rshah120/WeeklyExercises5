@@ -173,6 +173,23 @@ garden_harvest %>%
   * Add something of your own! And comment on if you prefer this to the static map and why or why not.
   
 ```{r}
+mallorcaMap <- get_stamenmap(
+    bbox = c(left = 2.28, bottom = 39.41, right = 3.03, top = 39.8), 
+    maptype = "terrain",
+    zoom = 10)
+
+ggmap(mallorcaMap) + 
+  geom_path(data = mallorca_bike_day7, 
+             aes(x = lon, y = lat, color = ele), 
+             size = .5) +
+  annotate("point", x = 2.586712, y = 39.66002, color = "red") +
+  annotate("text", x = 2.586712, y = 39.65002, color = "red", 
+           label = "Current Location") +
+  scale_color_viridis_c()+
+  theme_map() +
+  transition_reveal(time) +
+  labs(caption = )
+  
 
 ```
   
