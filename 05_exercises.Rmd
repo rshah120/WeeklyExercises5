@@ -147,11 +147,11 @@ garden_harvest %>%
   ungroup() %>% 
   complete(variety, date, fill = list(daily_harvest_lb = 0)) %>%
   group_by(variety) %>%
-  mutate(cumulative_harvest_lb = cumsum(daily_harvest_lb)) %>%
+  mutate(cumulative_harvest = cumsum(daily_harvest_lb)) %>%
   ggplot() +
-  geom_area(aes(x = date, y = cumulative_harvest_lb, fill = fct_reorder2(variety, variety, cumulative_harvest_lb,.desc = FALSE))) +
+  geom_area(aes(x = date, y = cumulative_harvest, fill = fct_reorder2(variety, variety, cumulative_harvest,.desc = FALSE))) +
   theme(legend.position = "top") +
-  labs(title = "Tomatoes Cumulative Harvest, by Variety",
+  labs(title = "Cumulative Harvest of Tomatoes, by Variety (In lbs)",
        subtitle = "Date: {frame_along}") +
   transition_reveal(date)
 
@@ -180,13 +180,12 @@ ggmap(mallorcaMap) +
   geom_path(data = mallorca_bike_day7, 
              aes(x = lon, y = lat, color = ele), 
              size = .5) +
-  annotate("point", x = 2.586712, y = 39.66002, color = "red") +
-  annotate("text", x = 2.586712, y = 39.65002, color = "red", 
-           label = "Current Location") +
+  geom_point(data = mallorca_bike_day7, aes(x = lon, y = lat), 
+             size = 0.7, color = "red") +
   scale_color_viridis_c() +
+  labs(subtitle = "Time: {frame_along}") +
   theme_map() +
-  transition_reveal(time) +
-  labs(subtitle = "Time: {frame_along}")
+  transition_reveal(time)
 
 ```
   
@@ -216,9 +215,9 @@ myCovid19 <-
   mutate(new_cases_per_week = cases - week_lag) %>%
   replace_na(list(new_cases_per_week = 0)) %>%
   filter(cases > 20) %>%
-  ggplot(aes(x = cases, y = new_cases_per_week, color = state)) +
-  scale_color_viridis_d() +
+  ggplot(aes(x = cases, y = new_cases_per_week, group = state)) +
   geom_path() +
+  geom_text(aes(label = state)) +
   scale_x_log10() +
   scale_y_log10() +
   transition_reveal(date)
@@ -238,9 +237,41 @@ animate(myCovid19, duration = 30, nframes = 200)
 census_pop_est_2018 <- read_csv("https://www.dropbox.com/s/6txwv3b4ng7pepe/us_census_2018_state_pop_est.csv?dl=1") %>% 
   separate(state, into = c("dot","state"), extra = "merge") %>% 
   select(-dot) %>% 
-  mutate(state = str_to_lower(state)) %>%
+  mutate(state = str_to_lower(state))
+
+## Parsed with column specification:
+## cols(
+##   state = col_character(),
+##   est_pop_2018 = col_double()
+## )
   
 states_map <- map_data("state")
+```
+
+```{r}
+case <- covid19 %>%
+  mutate(state_name = str_to_lower(state)) %>%
+  arrange(desc(date)) %>%
+  left_join(census_pop_est_2018,
+            by = c("state_name" = "state")) %>%
+  mutate(cases_per_10000 = (cases/est_pop_2018)*10000,
+         day_of_week = wday(date, label = TRUE)) %>%
+  filter(day_of_week == "Fri") %>%
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = state_name,
+               fill = cases_per_10000,
+               group = date)) +
+  expand_limits(x = states_map$long, y = states_map$lat) +
+  theme_map() +
+  labs(title = "COVID-19 Cases per 10,000 People in Different States by Color",
+       fill = "Cases per 10,000",
+       subtitle = "Date: {frame_time}") +
+  transition_time(date)
+
+case
+
+animate(case, nframes = 200, end_pause = 10)
 ```
 
 ## Your first `shiny` app (for next week!)
