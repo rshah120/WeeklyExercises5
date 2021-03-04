@@ -182,7 +182,7 @@ ggmap(mallorcaMap) +
              aes(x = lon, y = lat, color = ele), 
              size = .5) +
   geom_point(data = mallorca_bike_day7, aes(x = lon, y = lat), 
-             size = 0.7, color = "red") +
+             size = .9, color = "red") +
   scale_color_viridis_c() +
   labs(subtitle = "Time: {frame_along}") +
   theme_map() +
