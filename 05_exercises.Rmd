@@ -1,6 +1,6 @@
 ---
 title: 'Weekly Exercises #5'
-author: "Rohit Shah"
+author: "Rohit Shah, ***WORKED WITH NOLAN MEYER AND OMAR ANWAR***"
 output: 
   html_document:
     keep_md: TRUE
@@ -149,7 +149,8 @@ garden_harvest %>%
   group_by(variety) %>%
   mutate(cumulative_harvest = cumsum(daily_harvest_lb)) %>%
   ggplot() +
-  geom_area(aes(x = date, y = cumulative_harvest, fill = fct_reorder2(variety, variety, cumulative_harvest,.desc = FALSE))) +
+  geom_area(aes(x = date, y = cumulative_harvest, 
+                fill = fct_reorder2(variety, variety, cumulative_harvest,.desc = FALSE))) +
   theme(legend.position = "top") +
   labs(title = "Cumulative Harvest of Tomatoes, by Variety (In lbs)",
        subtitle = "Date: {frame_along}") +
@@ -192,7 +193,23 @@ ggmap(mallorcaMap) +
   5. In this exercise, you get to meet my sister, Heather! She is a proud Mac grad, currently works as a Data Scientist at 3M where she uses R everyday, and for a few years (while still holding a full-time job) she was a pro triathlete. You are going to map one of her races. The data from each discipline of the Ironman 70.3 Pan Am championships, Panama is in a separate file - `panama_swim`, `panama_bike`, and `panama_run`. Create a similar map to the one you created with my cycling data. You will need to make some small changes: 1. combine the files (HINT: `bind_rows()`, 2. make the leading dot a different color depending on the event (for an extra challenge, make it a different image using `geom_image()!), 3. CHALLENGE (optional): color by speed, which you will need to compute on your own from the data. You can read Heather's race report [here](https://heatherlendway.com/2016/02/10/ironman-70-3-pan-american-championships-panama-race-report/). She is also in the Macalester Athletics [Hall of Fame](https://athletics.macalester.edu/honors/hall-of-fame/heather-lendway/184) and still has records at the pool. 
   
 ```{r}
+panamTotal <- bind_rows(panama_swim, panama_bike, panama_run)
 
+panamaMap <- get_stamenmap(
+  bbox = c(left = -79.6140, bottom = 8.8701, top = 8.9875, right = -79.4270),
+  maptype = "terrain",
+  zoom = 12)
+
+ggmap(panamaMap) +
+  geom_path(data = panamTotal, 
+            aes(x = lon, y = lat),
+            size = 0.3) +
+  geom_point(data = panamTotal,
+             aes(x = lon, y = lat, color = event),
+             size = 0.6) +
+  labs(subtitle = "Time: {frame_along}") +
+  theme_map() +
+  transition_reveal(time)
 ```
   
 ## COVID-19 data
